@@ -7,8 +7,6 @@ CREATE OR REPLACE PACKAGE BODY AUDIT_CONNECTION AS
     PROCEDURE INSERT_CONNECTION_INFO (p_connection_status in varchar2
                                      ,p_error_code        in varchar2 default null) AS
 
-        v_session_data sys.gv_$session%rowtype;
-    
     BEGIN
         -- Insert session data
         insert into audit_connections
@@ -22,7 +20,6 @@ CREATE OR REPLACE PACKAGE BODY AUDIT_CONNECTION AS
         ,machine
         ,ip_address
         ,service_name
-        ,program
         ,module
         ,authentication_type
         ,logon_time
@@ -39,7 +36,6 @@ CREATE OR REPLACE PACKAGE BODY AUDIT_CONNECTION AS
         ,sys_context('USERENV','HOST')
         ,nvl(sys_context ('USERENV', 'IP_ADDRESS'),'UNKNOWN')
         ,sys_context('USERENV','SERVICE_NAME')
-        ,null
         ,sys_context('USERENV' ,'MODULE')
         ,sys_context ('USERENV', 'AUTHENTICATION_TYPE')
         ,systimestamp
@@ -72,6 +68,7 @@ CREATE OR REPLACE PACKAGE BODY AUDIT_CONNECTION AS
                                    ,1017 -- ORA-01017 - invalid username/password; logon denied
                                    ,1035 -- ORA-01035 - Oracle only available to users with restricted session priv
                                    ,1045 -- ORA-01045 - create session privilege not granted
+				   ,28000 -- ORA-28000 - the account is locked
                                    ) then
 
             insert_connection_info('DENIED',ora_server_error(1));
